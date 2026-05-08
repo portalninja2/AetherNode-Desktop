@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AetherNode Desktop</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="theme-color" content="#1a1a2e">
+    
+    <!-- PWA Features -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AetherNode Desktop">
+</head>
+<body>
+    <div class="desktop-container">
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Desktop Area mit Ordnern -->
+            <div class="desktop-area" id="desktopArea">
+                <!-- Hier werden App-Ordner/Gruppen angezeigt -->
+            </div>
+            
+            <!-- Multi-Window Container -->
+            <div class="windows-container" id="windowsContainer">
+                <!-- Hier werden geöffnete Fenster angezeigt -->
+            </div>
+            
+            <!-- App Icons Grid (ausblendbar) -->
+            <div class="app-grid" id="appGrid" style="display: none;"></div>
+
+            <!-- Fallback für Single-Window Mode -->
+            <div class="app-view" id="appView" style="display: none;">
+                <div class="app-empty-state">
+                    <h2>Wähle eine Anwendung</h2>
+                    <p>Klicke auf ein Symbol in der linken Leiste oder dem Raster, um eine Anwendung zu starten</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Settings Modal -->
+        <div class="modal" id="settingsModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Einstellungen</h2>
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-section">
+                        <h3>Anwendungen verwalten</h3>
+                        <div id="appsList"></div>
+                    </div>
+                    <div class="settings-section">
+                        <h3>Neue Anwendung hinzufügen</h3>
+                        <form id="addAppForm">
+                            <input type="text" id="appName" placeholder="App Name" required>
+                            <input type="url" id="appUrl" placeholder="App URL" required>
+                            <input type="text" id="appIcon" placeholder="Emoji oder Initialen (z.B. 📝 oder A)">
+                            <button type="submit">Hinzufügen</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Taskleiste -->
+        <div class="taskbar" id="taskbar">
+            <div class="taskbar-left">
+                <button class="start-btn" id="startBtn" title="Start Menu">
+                    <span class="start-icon">🚀</span>
+                    <span class="start-text">Start</span>
+                </button>
+                
+                <div class="quick-launch" id="quickLaunch">
+                    <!-- Schnellstart Apps -->
+                </div>
+            </div>
+            
+            <div class="taskbar-center">
+                <div class="running-apps" id="runningApps">
+                    <!-- Geöffnete Apps -->
+                </div>
+            </div>
+            
+            <div class="taskbar-right">
+                <div class="system-tray">
+                    <button class="tray-btn" id="notificationBtn" title="Benachrichtigungen">
+                        <span class="tray-icon">🔔</span>
+                    </button>
+                    <button class="tray-btn" id="settingsBtn" title="Einstellungen">
+                        <span class="tray-icon">⚙️</span>
+                    </button>
+                    <div class="clock" id="clock">
+                        <span id="timeDisplay">00:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Start Menu -->
+        <div class="start-menu" id="startMenu">
+            <div class="start-menu-header">
+                <h3>AetherNode Desktop</h3>
+            </div>
+            <div class="start-menu-content">
+                <div class="start-menu-section">
+                    <h4>System</h4>
+                    <div id="systemActions">
+                        <button class="start-menu-item system-item" id="settingsFromStart">
+                            <span class="item-icon">⚙️</span>
+                            <span class="item-name">Einstellungen</span>
+                        </button>
+                        <button class="start-menu-item system-item" id="groupManagerFromStart">
+                            <span class="item-icon">📁</span>
+                            <span class="item-name">App-Gruppen</span>
+                        </button>
+                        <button class="start-menu-item system-item" id="hotkeysFromStart">
+                            <span class="item-icon">⌨️</span>
+                            <span class="item-name">Tastenkürzel</span>
+                        </button>
+                        <button class="start-menu-item system-item" id="exportImportFromStart">
+                            <span class="item-icon">💾</span>
+                            <span class="item-name">Export/Import</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="start-menu-section">
+                    <h4>App-Gruppen</h4>
+                    <div id="appGroups"></div>
+                </div>
+                <div class="start-menu-section">
+                    <h4>Alle Apps</h4>
+                    <div id="allAppsStart"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- App Group Manager Modal -->
+        <div class="modal" id="groupManagerModal">
+            <div class="modal-content group-manager-modal">
+                <div class="modal-header">
+                    <h2>📁 App-Gruppen verwalten</h2>
+                    <button class="close-btn" onclick="closeModal('groupManagerModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="group-manager">
+                        <!-- Bestehende Gruppen -->
+                        <div class="groups-section">
+                            <h3>Bestehende Gruppen</h3>
+                            <div class="groups-list" id="groupsList">
+                                <!-- Dynamisch gefüllt -->
+                            </div>
+                        </div>
+                        
+                        <!-- Neue Gruppe erstellen -->
+                        <div class="group-editor">
+                            <h3>Neue Gruppe erstellen</h3>
+                            <form id="createGroupForm" class="group-form">
+                                <div class="form-row">
+                                    <input type="text" id="groupName" placeholder="Gruppenname" required>
+                                    <input type="text" id="groupIcon" placeholder="Icon (z.B. 📁)" value="📁">
+                                    <input type="color" id="groupColor" value="#6366f1" title="Gruppenfarbe">
+                                </div>
+                                <button type="submit" class="create-group-btn">Gruppe erstellen</button>
+                            </form>
+                        </div>
+                        
+                        <!-- App-Zuordnung -->
+                        <div id="appAssignmentSection" class="app-assignment-section" style="display: none;">
+                            <h3 id="assignmentTitle">Apps zu Gruppe hinzufügen</h3>
+                            <div class="available-apps" id="availableApps">
+                                <!-- Dynamisch gefüllt -->
+                            </div>
+                            <div class="assignment-actions">
+                                <button type="button" class="btn-cancel" onclick="closeAppAssignment()">Abbrechen</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hotkey Help Modal -->
+        <div class="modal" id="hotkeysModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>⌨️ Tastenkombinationen</h2>
+                    <button class="close-btn" onclick="closeModal('hotkeysModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="hotkeys-list" id="hotkeysList">
+                        <!-- Wird dynamisch gefüllt -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        
+        <!-- Export/Import Modal -->
+        <div class="modal" id="exportImportModal">
+            <div class="modal-content export-import-modal">
+                <div class="modal-header">
+                    <h2>💾 Export & Import</h2>
+                    <button class="close-btn" onclick="closeModal('exportImportModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="export-import-manager">
+                        <!-- Export Section -->
+                        <div class="export-section">
+                            <h3>📤 Einstellungen exportieren</h3>
+                            <p class="section-desc">Speichere alle deine Apps, Gruppen und Einstellungen als Datei.</p>
+                            
+                            <div class="export-options">
+                                <div class="export-option">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="exportApps" checked>
+                                        <span class="checkmark"></span>
+                                        Apps & Gruppen
+                                    </label>
+                                </div>
+                                <div class="export-option">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="exportSettings" checked>
+                                        <span class="checkmark"></span>
+                                        UI Einstellungen
+                                    </label>
+                                </div>
+                                <div class="export-option">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="exportHotkeys" checked>
+                                        <span class="checkmark"></span>
+                                        Custom Hotkeys
+                                    </label>
+                                </div>
+                                <div class="export-option">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="exportStats">
+                                        <span class="checkmark"></span>
+                                        Nutzungsstatistiken
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="export-actions">
+                                <button class="export-btn" id="exportBtn" onclick="exportSettings()">
+                                    📥 Einstellungen exportieren
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Import Section -->
+                        <div class="import-section">
+                            <h3>📥 Einstellungen importieren</h3>
+                            <p class="section-desc">Lade eine zuvor exportierte Einstellungsdatei.</p>
+                            
+                            <div class="import-options">
+                                <div class="import-option">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="mergeMode" checked>
+                                        <span class="checkmark"></span>
+                                        Mit bestehenden Daten zusammenfügen
+                                    </label>
+                                    <small>Ausgeschaltet = Bestehende Daten ersetzen</small>
+                                </div>
+                            </div>
+                            
+                            <div class="import-actions">
+                                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImportFile()">
+                                <button class="import-btn" onclick="document.getElementById('importFile').click()">
+                                    📁 Datei auswählen
+                                </button>
+                            </div>
+                            
+                            <div id="importPreview" class="import-preview" style="display: none;">
+                                <!-- Import preview wird hier angezeigt -->
+                            </div>
+                        </div>
+                        
+                        <!-- Backup Info -->
+                        <div class="backup-info">
+                            <h3>🔒 Backup-Info</h3>
+                            <div class="backup-stats" id="backupStats">
+                                <!-- Wird dynamisch gefüllt -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="storage.js"></script>
+    <script src="utils.js"></script>
+    <script src="window-manager.js"></script>
+    <script src="hotkeys.js"></script>
+    <script src="pwa.js"></script>
+    <script src="calculator.js"></script>
+    <script src="export-import.js"></script>
+    <script src="debug-fixes.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+

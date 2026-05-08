@@ -1,0 +1,39 @@
+{
+  "name": "aethernode-desktop",
+  "version": "1.0.0",
+  "description": "Modulare Desktop Suite für AetherNode Anwendungen - Lokal gespeichert, keine Serverdaten",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000 || php -S localhost:8000",
+    "build": "echo 'No build required - Pure HTML/CSS/JS'",
+    "deploy": "echo 'Copy entire directory to webserver'"
+  },
+  "keywords": [
+    "desktop",
+    "suite",
+    "local-storage",
+    "notes",
+    "calendar",
+    "projects",
+    "tools",
+    "web-app",
+    "pwa"
+  ],
+  "author": "AetherNode",
+  "license": "Proprietary",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/aethernode-desktop"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "server.js": "^1.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

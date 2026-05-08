@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AetherNode Taschenrechner</title>
+    <style>
+        :root {
+            --bg-primary: #020608;
+            --bg-secondary: #080f14;
+            --bg-tertiary: #0d1a22;
+            --text-primary: #b8f0c8;
+            --text-secondary: #4a8a5e;
+            --text-dim: #2a4a35;
+            --accent: #00ff88;
+            --accent-dim: rgba(0, 255, 136, 0.12);
+            --accent-glow: rgba(0, 255, 136, 0.35);
+            --accent-border: rgba(0, 255, 136, 0.22);
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg-dark: #1a1a2e;
+            --bg-light: #2d2d44;
+            --border-color: #404060;
+            --danger: #ef4444;
+            --hover-bg: #3a3a52;
+            --transition: 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-primary);
+            background-image:
+                radial-gradient(ellipse at 20% 50%, rgba(0, 40, 25, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(0, 20, 40, 0.1) 0%, transparent 50%);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .calculator-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent-border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 
+                0 0 0 1px rgba(0, 255, 136, .05), 
+                0 0 60px rgba(0, 0, 0, .8),
+                0 0 30px rgba(0, 255, 136, 0.1);
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--accent-border);
+        }
+
+        .calculator-title {
+            font-size: 1.2rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .calculator-subtitle {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .calculator-display {
+            background: var(--bg-primary);
+            border: 2px solid var(--accent-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .display-history {
+            font-size: 12px;
+            color: var(--text-secondary);
+            min-height: 16px;
+            text-align: right;
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+            opacity: 0.7;
+        }
+
+        .display-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 28px;
+            font-weight: 700;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            outline: none;
+            text-shadow: 0 0 10px rgba(184, 240, 200, 0.3);
+        }
+
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .calc-btn {
+            height: 55px;
+            border: 1px solid var(--accent-border);
+            border-radius: 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calc-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .calc-btn:hover::before {
+            left: 100%;
+        }
+
+        .calc-btn:hover {
+            background: var(--bg-light);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.2);
+        }
+
+        .calc-btn:active {
+            transform: translateY(0);
+        }
+
+        .calc-btn.operator {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .calc-btn.operator:hover {
+            background: linear-gradient(135deg, var(--primary-dark), #3730a3);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .calc-btn.equals {
+            background: linear-gradient(135deg, var(--accent), #059669);
+            color: var(--bg-primary);
+            border-color: var(--accent);
+        }
+
+        .calc-btn.equals:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.4);
+        }
+
+        .calc-btn.clear {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        .calc-btn.clear:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .calc-btn.zero {
+            grid-column: span 2;
+        }
+
+        .calculator-footer {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+        }
+
+        /* Keyboard hint animation */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .keyboard-hint {
+            animation: pulse 2s infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            .calculator-container {
+                padding: 16px;
+                margin: 10px;
+            }
+            
+            .calc-btn {
+                height: 50px;
+                font-size: 16px;
+            }
+            
+            .display-input {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="calculator-header">
+            <div class="calculator-title">🧮 CALCULATOR</div>
+            <div class="calculator-subtitle">AetherNode Terminal Suite</div>
+        </div>
+        
+        <div class="calculator-display">
+            <div class="display-history" id="calcHistory"></div>
+            <input type="text" id="calcDisplay" class="display-input" value="0" readonly>
+        </div>
+        
+        <div class="calculator-buttons" id="calcButtons">
+            <!-- Buttons werden dynamisch generiert -->
+        </div>
+        
+        <div class="calculator-footer keyboard-hint">
+            ESC: Clear • Enter: Equals • Keyboard Supported
+        </div>
+    </div>
+
+    <script>
+        /**
+         * AetherNode Calculator - Standalone Version
+         */
+        class AetherCalculator {
+            constructor() {
+                this.display = document.getElementById('calcDisplay');
+                this.history = document.getElementById('calcHistory');
+                this.currentInput = '0';
+                this.previousInput = '';
+                this.operator = null;
+                this.waitingForOperand = false;
+                this.historyLog = [];
+                
+                this.setupCalculator();
+                this.setupKeyboard();
+            }
+            
+            setupCalculator() {
+                const container = document.getElementById('calcButtons');
+                
+                const buttons = [
+                    { text: 'C', class: 'clear', action: 'clear' },
+                    { text: '±', class: 'operator', action: 'negate' },
+                    { text: '%', class: 'operator', action: '%' },
+                    { text: '÷', class: 'operator', action: '/' },
+                    
+                    { text: '7', class: 'number', action: '7' },
+                    { text: '8', class: 'number', action: '8' },
+                    { text: '9', class: 'number', action: '9' },
+                    { text: '×', class: 'operator', action: '*' },
+                    
+                    { text: '4', class: 'number', action: '4' },
+                    { text: '5', class: 'number', action: '5' },
+                    { text: '6', class: 'number', action: '6' },
+                    { text: '−', class: 'operator', action: '-' },
+                    
+                    { text: '1', class: 'number', action: '1' },
+                    { text: '2', class: 'number', action: '2' },
+                    { text: '3', class: 'number', action: '3' },
+                    { text: '+', class: 'operator', action: '+' },
+                    
+                    { text: '0', class: 'number zero', action: '0' },
+                    { text: '.', class: 'number', action: '.' },
+                    { text: '=', class: 'equals', action: '=' }
+                ];
+                
+                container.innerHTML = buttons.map(btn => 
+                    `<button class="calc-btn ${btn.class}" data-action="${btn.action}">${btn.text}</button>`
+                ).join('');
+                
+                container.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('calc-btn')) {
+                        const action = e.target.dataset.action;
+                        this.handleInput(action);
+                    }
+                });
+            }
+            
+            setupKeyboard() {
+                document.addEventListener('keydown', (e) => {
+                    this.handleKeyboard(e);
+                });
+            }
+            
+            handleKeyboard(e) {
+                e.preventDefault();
+                const key = e.key;
+                
+                if (key >= '0' && key <= '9') {
+                    this.handleInput(key);
+                } else if (key === '.') {
+                    this.handleInput('.');
+                } else if (key === '+') {
+                    this.handleInput('+');
+                } else if (key === '-') {
+                    this.handleInput('-');
+                } else if (key === '*') {
+                    this.handleInput('*');
+                } else if (key === '/') {
+                    this.handleInput('/');
+                } else if (key === '%') {
+                    this.handleInput('%');
+                } else if (key === 'Enter' || key === '=') {
+                    this.handleInput('=');
+                } else if (key === 'Escape' || key === 'c' || key === 'C') {
+                    this.handleInput('clear');
+                } else if (key === 'Backspace') {
+                    this.backspace();
+                }
+            }
+            
+            handleInput(action) {
+                if (this.isNumber(action)) {
+                    this.inputNumber(action);
+                } else if (action === '.') {
+                    this.inputDecimal();
+                } else if (this.isOperator(action)) {
+                    this.inputOperator(action);
+                } else if (action === '=') {
+                    this.calculate();
+                } else if (action === 'clear') {
+                    this.clear();
+                } else if (action === 'negate') {
+                    this.negate();
+                }
+                
+                this.updateDisplay();
+            }
+            
+            inputNumber(number) {
+                if (this.waitingForOperand) {
+                    this.currentInput = number;
+                    this.waitingForOperand = false;
+                } else {
+                    this.currentInput = this.currentInput === '0' ? number : this.currentInput + number;
+                }
+            }
+            
+            inputDecimal() {
+                if (this.waitingForOperand) {
+                    this.currentInput = '0.';
+                    this.waitingForOperand = false;
+                } else if (this.currentInput.indexOf('.') === -1) {
+                    this.currentInput += '.';
+                }
+            }
+            
+            inputOperator(nextOperator) {
+                const inputValue = parseFloat(this.currentInput);
+                
+                if (this.previousInput === '') {
+                    this.previousInput = inputValue;
+                } else if (this.operator) {
+                    const result = this.performCalculation();
+                    this.currentInput = String(result);
+                    this.previousInput = result;
+                    this.addToHistory(`${this.previousInput} ${this.getOperatorSymbol(this.operator)} ${inputValue} = ${result}`);
+                }
+                
+                this.waitingForOperand = true;
+                this.operator = nextOperator;
+            }
+            
+            calculate() {
+                if (this.operator && !this.waitingForOperand) {
+                    const inputValue = parseFloat(this.currentInput);
+                    const result = this.performCalculation();
+                    
+                    this.addToHistory(`${this.previousInput} ${this.getOperatorSymbol(this.operator)} ${inputValue} = ${result}`);
+                    
+                    this.currentInput = String(result);
+                    this.previousInput = '';
+                    this.operator = null;
+                    this.waitingForOperand = true;
+                }
+            }
+            
+            performCalculation() {
+                const prev = this.previousInput;
+                const current = parseFloat(this.currentInput);
+                let result = 0;
+                
+                switch (this.operator) {
+                    case '+': result = prev + current; break;
+                    case '-': result = prev - current; break;
+                    case '*': result = prev * current; break;
+                    case '/': result = current !== 0 ? prev / current : 0; break;
+                    case '%': result = prev % current; break;
+                }
+                
+                return Math.round(result * 10000000000) / 10000000000;
+            }
+            
+            clear() {
+                this.currentInput = '0';
+                this.previousInput = '';
+                this.operator = null;
+                this.waitingForOperand = false;
+            }
+            
+            negate() {
+                if (this.currentInput !== '0') {
+                    this.currentInput = this.currentInput.startsWith('-') 
+                        ? this.currentInput.slice(1) 
+                        : '-' + this.currentInput;
+                }
+            }
+            
+            backspace() {
+                if (!this.waitingForOperand) {
+                    this.currentInput = this.currentInput.length > 1 
+                        ? this.currentInput.slice(0, -1) 
+                        : '0';
+                }
+            }
+            
+            updateDisplay() {
+                if (this.display) {
+                    const displayValue = this.formatNumber(this.currentInput);
+                    this.display.value = displayValue;
+                }
+            }
+            
+            formatNumber(value) {
+                if (value === '0' || value === '') return '0';
+                
+                const number = parseFloat(value);
+                if (isNaN(number)) return '0';
+                
+                if (Math.abs(number) >= 1000000) {
+                    return number.toExponential(6);
+                }
+                
+                return number.toLocaleString('de-DE', {
+                    maximumFractionDigits: 10
+                });
+            }
+            
+            addToHistory(calculation) {
+                this.historyLog.unshift(calculation);
+                if (this.historyLog.length > 5) {
+                    this.historyLog.pop();
+                }
+                
+                if (this.history) {
+                    this.history.textContent = this.historyLog[0] || '';
+                }
+            }
+            
+            isNumber(value) {
+                return !isNaN(value) && value !== '.';
+            }
+            
+            isOperator(value) {
+                return ['+', '-', '*', '/', '%'].includes(value);
+            }
+            
+            getOperatorSymbol(op) {
+                const symbols = { '+': '+', '-': '−', '*': '×', '/': '÷', '%': '%' };
+                return symbols[op] || op;
+            }
+        }
+
+        // Calculator initialisieren
+        document.addEventListener('DOMContentLoaded', () => {
+            new AetherCalculator();
+        });
+    </script>
+</body>
+</html>
