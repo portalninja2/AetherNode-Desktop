@@ -11,8 +11,6 @@ Eine modulare, lokal gespeicherte Desktop-ähnliche Suite zur Verwaltung aller A
 - **Verwaltung**: Apps über die Einstellungen hinzufügen, bearbeiten und löschen
 - **Statistiken**: Nutzungsstatistiken werden lokal gespeichert
 - **Backup & Restore**: Datenbackup und Wiederherstellung
-- **Responsive Design**: Funktioniert auch auf kleineren Bildschirmen
-- **Keyboard Shortcuts**: ESC = Schließen, Ctrl+Shift+S = Einstellungen, F5 = Reload
 
 ## Standard Apps
 
@@ -187,7 +185,7 @@ Benötigt: localStorage und iframes
 ## Tipps & Tricks 💡
 
 1. **Schneller Zugriff**: Nutze Keyboard Shortcuts
-2. **Backup erstellen**: Exportiere deine Konfiguration regelmäßig
+2. **Backup erstellen**: Exportiere deine Konfiguration regelmäßig ⚠️ Funktion in Entwicklung!
 3. **Custom Icons**: Nutze beliebige Emojis oder Symbole
 4. **Dark Mode**: Ist bereits eingebaut und aktiv
 
