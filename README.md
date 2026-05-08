@@ -10,7 +10,7 @@ Eine modulare, lokal gespeicherte Desktop-ähnliche Suite zur Verwaltung aller A
 - **Modular**: Einfach neue Apps hinzufügen oder entfernen
 - **Verwaltung**: Apps über die Einstellungen hinzufügen, bearbeiten und löschen
 - **Statistiken**: Nutzungsstatistiken werden lokal gespeichert
-- **Backup & Restore**: Datenbackup und Wiederherstellung
+- **Backup & Restore**: Datenbackup und Wiederherstellung ⚠️ Funktion in Entwicklung!
 
 ## Standard Apps
 
